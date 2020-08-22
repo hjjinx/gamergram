@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, Text, TextInput} from 'react-native';
+import {View, Text, TextInput, TouchableOpacity} from 'react-native';
 import Icon from 'react-native-vector-icons/Entypo';
 import {
   widthPercentageToDP as wp,
@@ -9,6 +9,15 @@ import {
 import {Colors} from './Constants/Styles';
 
 export default class Login extends React.Component {
+  state = {
+    usernameOrEmail: '',
+    password: '',
+  };
+
+  login = () => {
+    console.log(this.state);
+    //
+  };
   render() {
     return (
       <View style={{flex: 1, backgroundColor: Colors.MainBackground}}>
@@ -42,8 +51,9 @@ export default class Login extends React.Component {
             size={25}
             style={{marginTop: hp('2.5'), paddingHorizontal: wp('4')}}></Icon>
           <TextInput
+            onChangeText={(t) => this.setState({usernameOrEmail: t})}
             placeholder="Username / Email"
-            placeholderTextColor={Colors.MainBackground}
+            placeholderTextColor={'#877'}
             style={{
               flex: 1,
               padding: 0,
@@ -68,9 +78,10 @@ export default class Login extends React.Component {
             size={25}
             style={{marginTop: hp('2.5'), paddingHorizontal: wp('4')}}></Icon>
           <TextInput
+            onChangeText={(t) => this.setState({password: t})}
             secureTextEntry={true}
             placeholder="Password"
-            placeholderTextColor={Colors.MainBackground}
+            placeholderTextColor={'#877'}
             style={{
               flex: 1,
               padding: 0,
@@ -98,15 +109,20 @@ export default class Login extends React.Component {
               borderRadius: 20,
               marginHorizontal: wp('10'),
             }}>
-            <Text style={{textAlign: 'center', color: '#fff', fontSize: 15}}>
-              LOGIN
-            </Text>
+            <TouchableOpacity onPress={this.login}>
+              <Text style={{textAlign: 'center', color: '#fff', fontSize: 15}}>
+                LOGIN
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
         <View style={{flex: 10}}>
-          <Text style={{textAlign: 'center', color: '#fff', fontSize: 15}}>
-            Signup
-          </Text>
+          <TouchableOpacity
+            onPress={() => this.props.navigation.navigate('Signup')}>
+            <Text style={{textAlign: 'center', color: '#fff', fontSize: 15}}>
+              Signup
+            </Text>
+          </TouchableOpacity>
         </View>
       </View>
     );
