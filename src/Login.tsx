@@ -1,10 +1,11 @@
 import React from 'react';
-import {View, Text, TextInput, TouchableOpacity} from 'react-native';
+import {View, Text, TextInput, TouchableOpacity, Alert} from 'react-native';
 import Icon from 'react-native-vector-icons/Entypo';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
+import axios from 'axios';
 
 import {Colors} from './Constants/Styles';
 
@@ -15,8 +16,25 @@ export default class Login extends React.Component {
   };
 
   login = () => {
-    console.log(this.state);
-    //
+    const emailReg = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    const payload = {
+      password: this.state.password,
+    };
+    const usernameOrEmail = this.state.usernameOrEmail.toLowerCase();
+    if (usernameOrEmail.match(emailReg)) {
+      payload.email = usernameOrEmail;
+    } else payload.username = usernameOrEmail;
+    axios
+      .post('/api/users/login', payload)
+      .then((res) => {
+        console.log(res);
+      })
+      .catch((err) => {
+        if (err.response) {
+          Alert.alert('Error', err.response.data.message);
+        } else Alert.alert('There was an error.');
+        console.log(err.response);
+      });
   };
   render() {
     return (

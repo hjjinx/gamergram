@@ -27,7 +27,6 @@ export default class Login extends React.Component {
         } else Alert.alert('There was an error.');
         console.log(err.response);
       });
-    console.log(this.state);
   };
   render() {
     return (
