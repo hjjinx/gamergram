@@ -27,7 +27,6 @@ export default class Login extends React.Component {
   };
 
   async componentDidMount() {
-    await AsyncStorage.removeItem('token');
     if (await AsyncStorage.getItem('token')) {
       this.props.navigation.navigate('Home');
     }
