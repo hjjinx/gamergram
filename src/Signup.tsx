@@ -1,5 +1,12 @@
 import React from 'react';
-import {View, Text, TextInput, TouchableOpacity, Alert} from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  ActivityIndicator,
+} from 'react-native';
 import Icon from 'react-native-vector-icons/Entypo';
 import {
   widthPercentageToDP as wp,
@@ -7,26 +14,31 @@ import {
 } from 'react-native-responsive-screen';
 import axios from 'axios';
 
-import {Colors} from './Constants/Styles';
+import {Colors, styles} from './Constants/Styles';
 
 export default class Login extends React.Component {
   state = {
     username: '',
     email: '',
     password: '',
+    loading: false,
   };
   signup = () => {
-    axios
-      .post('/api/users/signup', this.state)
-      .then((res) => {
-        console.log(res);
-      })
-      .catch((err) => {
-        if (err.response) {
-          Alert.alert('Error', err.response.data.message);
-        } else Alert.alert('There was an error.');
-        console.log(err.response);
-      });
+    this.setState({loading: true}, () => {
+      axios
+        .post('/api/users/signup', this.state)
+        .then((res) => {
+          Alert.alert('Signed up', 'Please login to access your account');
+          this.setState({loading: false});
+        })
+        .catch((err) => {
+          if (err.response) {
+            Alert.alert('Error', err.response.data.message);
+          } else Alert.alert('Error', 'There was an error.');
+          console.log(err);
+          this.setState({loading: false});
+        });
+    });
   };
   render() {
     return (
@@ -61,6 +73,7 @@ export default class Login extends React.Component {
             size={25}
             style={{marginTop: hp('2.5'), paddingHorizontal: wp('4')}}></Icon>
           <TextInput
+            autoCapitalize="none"
             onChangeText={(t) => this.setState({username: t})}
             placeholder="Username"
             placeholderTextColor={'#877'}
@@ -88,6 +101,7 @@ export default class Login extends React.Component {
             size={25}
             style={{marginTop: hp('2.5'), paddingHorizontal: wp('4')}}></Icon>
           <TextInput
+            autoCapitalize="none"
             onChangeText={(t) => this.setState({email: t})}
             placeholder="Email"
             placeholderTextColor={'#877'}
@@ -108,6 +122,7 @@ export default class Login extends React.Component {
             marginHorizontal: 10,
             borderRadius: 15,
             marginVertical: 10,
+            marginBottom: 30,
           }}>
           <Icon
             name="key"
@@ -115,6 +130,7 @@ export default class Login extends React.Component {
             size={25}
             style={{marginTop: hp('2.5'), paddingHorizontal: wp('4')}}></Icon>
           <TextInput
+            autoCapitalize="none"
             onChangeText={(t) => this.setState({password: t})}
             secureTextEntry={true}
             placeholder="Password"
@@ -128,16 +144,6 @@ export default class Login extends React.Component {
             }}></TextInput>
         </View>
 
-        <View
-          style={{
-            flex: 7,
-            flexDirection: 'row',
-            justifyContent: 'center',
-          }}>
-          <Text style={{textAlign: 'center', color: '#8a8aa1', fontSize: 15}}>
-            Forgot Password?
-          </Text>
-        </View>
         <View style={{flex: 10}}>
           <TouchableOpacity onPress={this.signup}>
             <View
@@ -161,6 +167,11 @@ export default class Login extends React.Component {
             </Text>
           </TouchableOpacity>
         </View>
+        {this.state.loading && (
+          <View style={styles.loading}>
+            <ActivityIndicator size="large" color={Colors.backgroundSec} />
+          </View>
+        )}
       </View>
     );
   }

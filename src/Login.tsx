@@ -1,5 +1,14 @@
 import React from 'react';
-import {View, Text, TextInput, TouchableOpacity, Alert} from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  StyleSheet,
+  ActivityIndicator,
+} from 'react-native';
+import AsyncStorage from '@react-native-community/async-storage';
 import Icon from 'react-native-vector-icons/Entypo';
 import {
   widthPercentageToDP as wp,
@@ -7,34 +16,52 @@ import {
 } from 'react-native-responsive-screen';
 import axios from 'axios';
 
-import {Colors} from './Constants/Styles';
+import {Colors, styles} from './Constants/Styles';
+import {} from 'react-native-gesture-handler';
 
 export default class Login extends React.Component {
   state = {
     usernameOrEmail: '',
     password: '',
+    loading: true,
   };
 
+  async componentDidMount() {
+    await AsyncStorage.removeItem('token');
+    if (await AsyncStorage.getItem('token')) {
+      this.props.navigation.navigate('Home');
+    }
+    this.setState({loading: false});
+  }
+
   login = () => {
-    const emailReg = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    const payload = {
-      password: this.state.password,
-    };
-    const usernameOrEmail = this.state.usernameOrEmail.toLowerCase();
-    if (usernameOrEmail.match(emailReg)) {
-      payload.email = usernameOrEmail;
-    } else payload.username = usernameOrEmail;
-    axios
-      .post('/api/users/login', payload)
-      .then((res) => {
-        console.log(res);
-      })
-      .catch((err) => {
-        if (err.response) {
-          Alert.alert('Error', err.response.data.message);
-        } else Alert.alert('There was an error.');
-        console.log(err.response);
-      });
+    this.setState({loading: true}, () => {
+      const emailReg = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+      const payload = {
+        password: this.state.password,
+      };
+      const usernameOrEmail = this.state.usernameOrEmail;
+      if (usernameOrEmail.match(emailReg)) {
+        payload.email = usernameOrEmail;
+      } else payload.username = usernameOrEmail;
+      axios
+        .post('/api/users/login', payload)
+        .then(async (res) => {
+          if (res.data.message === 'success') {
+            await AsyncStorage.setItem('token', res.data.token);
+            this.props.navigation.navigate('Home');
+          }
+          this.setState({loading: false});
+          console.log(res);
+        })
+        .catch((err) => {
+          if (err.response) {
+            Alert.alert('Error', err.response.data.message);
+          } else Alert.alert('There was an error.');
+          console.log(err);
+          this.setState({loading: false});
+        });
+    });
   };
   render() {
     return (
@@ -69,6 +96,7 @@ export default class Login extends React.Component {
             size={25}
             style={{marginTop: hp('2.5'), paddingHorizontal: wp('4')}}></Icon>
           <TextInput
+            autoCapitalize="none"
             onChangeText={(t) => this.setState({usernameOrEmail: t})}
             placeholder="Username / Email"
             placeholderTextColor={'#877'}
@@ -96,6 +124,7 @@ export default class Login extends React.Component {
             size={25}
             style={{marginTop: hp('2.5'), paddingHorizontal: wp('4')}}></Icon>
           <TextInput
+            autoCapitalize="none"
             onChangeText={(t) => this.setState({password: t})}
             secureTextEntry={true}
             placeholder="Password"
@@ -142,6 +171,11 @@ export default class Login extends React.Component {
             </Text>
           </TouchableOpacity>
         </View>
+        {this.state.loading && (
+          <View style={styles.loading}>
+            <ActivityIndicator size="large" color={Colors.backgroundSec} />
+          </View>
+        )}
       </View>
     );
   }
