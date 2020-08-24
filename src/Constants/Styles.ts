@@ -2,6 +2,7 @@ import {StyleSheet} from 'react-native';
 
 export const Colors = {
   MainBackground: '#201f30',
+  MainBackgroundLight: '#373752',
   backgroundSec: '#f60e47',
   MainText: '#fff',
 };
